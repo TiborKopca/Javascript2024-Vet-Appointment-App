@@ -91,6 +91,7 @@ class AdminCitas {
     this.mostrar();
   }
   //EDIT EXISTING APPOINTMENT, FIND THE APPOINTMENT OBJECT PASSED, WITH THE ID PROPERTY
+  //We pass the new object(data loaded to the form from the array of appointments)
   editar(citaActualizada) {
     //map iterates over each element of the array, and returns a new array with the result of calling the callback function on each element
     this.citas = this.citas.map((cita) =>
@@ -98,11 +99,16 @@ class AdminCitas {
       //if its not the same, we return the element of the array(each element is an object in the array)
       cita.id === citaActualizada.id ? citaActualizada : cita
     );
+    editarDatosLocalStorage(citaActualizada);
     this.mostrar();
   }
-
+  //DELETE APPOINTMENT WITH THE ID PASSED
   eliminar(id) {
+    // console.log(id);
+    //FILTER GENERATES A NEW ARRAY WITHOUT THE ELEMENTS THAT MATCH THE CONDITION
     this.citas = this.citas.filter((cita) => cita.id !== id);
+    //DELETE THE APPOINTMENT FROM THE LOCAL STORAGE
+    eliminarDatosLocalStorage(id);
     //add code to remove the object from Local Storage
     this.mostrar();
   }
@@ -362,8 +368,9 @@ function generarId() {
 
 //EDITING THE APPOINTMENT, the cita object is passed to the function from the button event handler
 function cargarEdicion(cita) {
+//the edited object
   Object.assign(citaObj, cita);
-
+  id = cita.id;
   pacienteInput.value = cita.paciente;
   propietarioInput.value = cita.propietario;
   emailInput.value = cita.email;
@@ -371,6 +378,8 @@ function cargarEdicion(cita) {
   sintomasInput.value = cita.sintomas;
 //SET AUX VARIABLE TO TRUE - TO EXECUTE EDIT CODE IN THE FUNCTION 'submitCita'
   editando = true;
+
+  
   //BUTTON TEXT CHANGES TO SAVE CHANGES
   formularioInput.value = "Guardar Cambios";
 }
@@ -396,11 +405,6 @@ function cargarDatosLocalStorage() {
     console.log("No hay Citas");
   }
   console.log(citas);
-
-  //   console.log(dataLoaded);
-  // citas.forEach(cita => {
-  //     citas.push(cita)
-  // })
 }
 
 //SAVING DATA TO LOCAL STORAGE
@@ -410,3 +414,51 @@ function guardarDatosLocalStorage() {
 
   //make code to read existing and add new data
 }
+
+//DELETE DATA FROM LOCAL STORAGE
+function eliminarDatosLocalStorage(id) {
+    console.log(id);
+  //reads the JSON object from local storage
+  const citasfromJSON = JSON.parse(localStorage.getItem("citas")) || [];
+  console.log(citasfromJSON); //object
+
+  if (citasfromJSON !== null) {
+    //for each object in the array
+    for (index in citasfromJSON) {
+      // console.log(citasfromJSON[index]);
+      let cita = citasfromJSON[index];
+      if (cita.id === id) {
+        //delete the object from the array
+        citasfromJSON.splice(index, 1);
+        // console.log(citasfromJSON);
+
+        //STORE UPDATED DATA IN LOCAL STORAGE
+        guardarDatosLocalStorage();
+      }
+    }
+  } else {
+    console.log("No hay Citas");
+  }
+//   console.log(citas);
+}
+
+//EDIT DATA FROM LOCAL STORAGE
+function editarDatosLocalStorage(citaActualizada) {
+  //reads the JSON object from local storage
+  const citasfromJSON = JSON.parse(localStorage.getItem("citas")) || [];
+//   console.log(citasfromJSON); //object
+  if (citasfromJSON !== null) {
+    //for each object in the array
+    for (index in citasfromJSON) {
+      // console.log(citasfromJSON[index]);
+      let cita = citasfromJSON[index];
+      if (cita.id === id) {
+        //update the object with the new data
+        citasfromJSON[index] = { ...cita, ...citaActualizada };
+        // console.log(citasfromJSON);
+
+        //STORE UPDATED DATA IN LOCAL STORAGE
+        guardarDatosLocalStorage();
+      }
+    }
+  }}
